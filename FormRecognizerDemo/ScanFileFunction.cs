@@ -3,6 +3,7 @@ using System.Text.Json;
 using Azure;
 using Azure.AI.FormRecognizer.DocumentAnalysis;
 using Azure.Core;
+using FormRecognizerDemo.Models;
 using HttpMultipartParser;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
@@ -35,7 +36,7 @@ namespace FormRecognizerDemo
             DocumentAnalysisClient client =                 
                 new DocumentAnalysisClient(new Uri(_recognizerOptions.Endpoint), credential);
 
-            var documentType = ("prebuilt-" + PrebuiltModelType.Receipt).ToLower();
+            var documentType = ("prebuilt-" + PrebuiltModelType.Invoice).ToLower();
             AnalyzeDocumentOperation operation = await client
                .AnalyzeDocumentAsync(WaitUntil.Completed, documentType, file);
 
@@ -43,9 +44,10 @@ namespace FormRecognizerDemo
             //    .AnalyzeDocumentFromUriAsync(WaitUntil.Completed, "prebuilt-document", fileUri);
 
             AnalyzeResult result = operation.Value;
+            var mappedResult = InvoiceResponse.MapToDto(result);
 
             var response = req.CreateResponse(HttpStatusCode.OK);
-            await response.WriteAsJsonAsync(result);
+            await response.WriteAsJsonAsync(mappedResult);
             return response;
         }
     }
