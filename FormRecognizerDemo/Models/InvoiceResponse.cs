@@ -4,25 +4,31 @@ namespace FormRecognizerDemo.Models
 {
     public class DocumentAttributeResponse
     {
+        public DocumentAttributeResponse(string value, float? confidenceLevel)
+        {
+            Value = value;
+            ConfidenceLevel = confidenceLevel * 100;
+        }
+
         public string Value { get; set; }
         public float? ConfidenceLevel { get; set; }
     }
     public class LineItemResponse
     {
-        public KeyValuePair<string, float?> Description { get; set; }
-        public KeyValuePair<string, float?> Quantity { get; set; }
-        public KeyValuePair<string, float?> Amount { get; set; }
+        public DocumentAttributeResponse Description { get; set; }
+        public DocumentAttributeResponse Quantity { get; set; }
+        public DocumentAttributeResponse Amount { get; set; }
     }
     public class InvoiceResponse
     {
-        public KeyValuePair<string, float?> VendorName { get; set; }
-        public KeyValuePair<string, float?> CustomerName { get; set; }
-        public KeyValuePair<string, float?> SubTotal { get; set; }
-        public KeyValuePair<string, float?>  TotalTax { get; set; }
-        public KeyValuePair<string, float?> InvoiceTotal { get; set; }
-        public KeyValuePair<string, float?> BillingAddress { get; private set; }
-        public KeyValuePair<string, float?> VendorAddress { get; private set; }
-        public KeyValuePair<string, float?> InvoiceDate { get; private set; }
+        public DocumentAttributeResponse VendorName { get; set; }
+        public DocumentAttributeResponse CustomerName { get; set; }
+        public DocumentAttributeResponse SubTotal { get; set; }
+        public DocumentAttributeResponse TotalTax { get; set; }
+        public DocumentAttributeResponse InvoiceTotal { get; set; }
+        public DocumentAttributeResponse BillingAddress { get; private set; }
+        public DocumentAttributeResponse VendorAddress { get; private set; }
+        public DocumentAttributeResponse InvoiceDate { get; private set; }
         public IEnumerable<LineItemResponse> LineItems { get; set; }
 
         public static IEnumerable<InvoiceResponse> MapToDto (AnalyzeResult result)
@@ -32,52 +38,53 @@ namespace FormRecognizerDemo.Models
             for (int i = 0; i < result.Documents.Count; i++)
             {    
                 AnalyzedDocument document = result.Documents[i];
+                var fields = document.Fields;
                 var invoiceResponse = new InvoiceResponse();
-                invoiceResponse.VendorName = GetField(nameof(VendorName), document);
-                invoiceResponse.CustomerName = GetField(nameof(CustomerName), document);
-                invoiceResponse.SubTotal = GetField(nameof(SubTotal), document);
-                invoiceResponse.CustomerName = GetField(nameof(CustomerName), document);
-                invoiceResponse.SubTotal = GetField(nameof(SubTotal), document);
-                invoiceResponse.TotalTax = GetField(nameof(TotalTax), document);
-                invoiceResponse.InvoiceTotal = GetField(nameof(InvoiceTotal), document);
-                invoiceResponse.BillingAddress = GetField(nameof(BillingAddress), document);
-                invoiceResponse.VendorAddress = GetField(nameof(VendorAddress), document);
-                invoiceResponse.InvoiceDate = GetField(nameof(InvoiceDate), document);
+                invoiceResponse.VendorName = GetField(nameof(VendorName), fields);
+                invoiceResponse.CustomerName = GetField(nameof(CustomerName), fields);
+                invoiceResponse.SubTotal = GetField(nameof(SubTotal), fields);
+                invoiceResponse.CustomerName = GetField(nameof(CustomerName), fields);
+                invoiceResponse.SubTotal = GetField(nameof(SubTotal), fields);
+                invoiceResponse.TotalTax = GetField(nameof(TotalTax), fields);
+                invoiceResponse.InvoiceTotal = GetField(nameof(InvoiceTotal), fields);
+                invoiceResponse.BillingAddress = GetField(nameof(BillingAddress), fields);
+                invoiceResponse.VendorAddress = GetField(nameof(VendorAddress), fields);
+                invoiceResponse.InvoiceDate = GetField(nameof(InvoiceDate), fields);
                 invoiceResponse.LineItems = GetLineItems(document);
                 invoiceResponseCollection.Add(invoiceResponse);                
             }
             return invoiceResponseCollection;
         }
 
-        private static KeyValuePair<string, float?> GetField(string fieldName, AnalyzedDocument document)
+        private static DocumentAttributeResponse GetField(string fieldName, IReadOnlyDictionary<string, DocumentField> itemFields)
         {
             
-            if (document.Fields.TryGetValue(fieldName, out DocumentField? docField))
+            if (itemFields.TryGetValue(fieldName, out DocumentField? docField))
             {
                 if (docField.FieldType == DocumentFieldType.String)
                 {
                     string stringValue = docField.Value.AsString();
-                    return new KeyValuePair<string, float?>(stringValue, docField.Confidence);
+                    return new DocumentAttributeResponse(stringValue, docField.Confidence);
                    
                 }
                 if (docField.FieldType == DocumentFieldType.Currency)
                 {
                     CurrencyValue currencyValue = docField.Value.AsCurrency();
-                    return new KeyValuePair<string, float?>
+                    return new DocumentAttributeResponse
                         ($"{currencyValue.Symbol}{currencyValue.Amount}", docField.Confidence);                    
                 }
 
                 if (docField.FieldType == DocumentFieldType.Date)
                 {
                     DateTimeOffset dateValue = docField.Value.AsDate();
-                    return new KeyValuePair<string, float?>
-                        ($"{dateValue.ToString()}", docField.Confidence);
+                    return new DocumentAttributeResponse
+                        ($"{dateValue.ToString("d")}", docField.Confidence);
                 }
 
                 if (docField.FieldType == DocumentFieldType.Address)
                 {
                     AddressValue addressValue = docField.Value.AsAddress();
-                    return new KeyValuePair<string, float?>
+                    return new DocumentAttributeResponse
                         ($"{addressValue.HouseNumber}, {addressValue.Road}, {addressValue.City}, " +
                         $"{addressValue.State}, {addressValue.PoBox}, {addressValue.PostalCode}, {addressValue.CountryRegion}",
                         docField.Confidence);
@@ -94,35 +101,18 @@ namespace FormRecognizerDemo.Models
             {
                 if (itemsField.FieldType == DocumentFieldType.List)
                 {
+                    var currentLine = new LineItemResponse();
                     foreach (DocumentField itemField in itemsField.Value.AsList())
                     {   
-                        var currentLine = new LineItemResponse();
-
                         if (itemField.FieldType == DocumentFieldType.Dictionary)
                         {
                             IReadOnlyDictionary<string, DocumentField> itemFields = itemField.Value.AsDictionary();
-
-                            if (itemFields.TryGetValue("Description", out DocumentField? itemDescriptionField))
-                            {
-                                if (itemDescriptionField.FieldType == DocumentFieldType.String)
-                                {
-                                    string itemDescription = itemDescriptionField.Value.AsString();
-
-                                    Console.WriteLine($"  Description: '{itemDescription}', with confidence {itemDescriptionField.Confidence}");
-                                }
-                            }
-
-                            if (itemFields.TryGetValue("Amount", out DocumentField? itemAmountField))
-                            {
-                                if (itemAmountField.FieldType == DocumentFieldType.Currency)
-                                {
-                                    CurrencyValue itemAmount = itemAmountField.Value.AsCurrency();
-
-                                    Console.WriteLine($"  Amount: '{itemAmount.Symbol}{itemAmount.Amount}', with confidence {itemAmountField.Confidence}");
-                                }
-                            }
+                            currentLine.Description = GetField((nameof(currentLine.Description)), itemFields);
+                            currentLine.Quantity = GetField((nameof(currentLine.Quantity)), itemFields);
+                            currentLine.Amount = GetField((nameof(currentLine.Amount)), itemFields);
                         }
                     }
+                    lineItems.Add(currentLine);
                 }
             }
             return lineItems;
