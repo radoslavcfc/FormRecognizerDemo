@@ -1,6 +1,6 @@
 ﻿namespace FormRecognizerDemo.Models
 {
-    public class LineItemResponse
+    public class InvoiceLineItemResponse
     {
         public DocumentAttributeResponse Description { get; set; }
         public DocumentAttributeResponse Quantity { get; set; }

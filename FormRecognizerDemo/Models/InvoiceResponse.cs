@@ -12,7 +12,7 @@ namespace FormRecognizerDemo.Models
         public DocumentAttributeResponse BillingAddress { get; private set; }
         public DocumentAttributeResponse VendorAddress { get; private set; }
         public DocumentAttributeResponse InvoiceDate { get; private set; }
-        public IEnumerable<LineItemResponse> LineItems { get; set; }
+        public IEnumerable<InvoiceLineItemResponse> LineItems { get; set; }
 
         public static IEnumerable<InvoiceResponse> MapToDto (AnalyzeResult result)
         {
@@ -33,7 +33,7 @@ namespace FormRecognizerDemo.Models
                 invoiceResponse.BillingAddress = DocumentFieldMapper.GetField(nameof(BillingAddress), fields);
                 invoiceResponse.VendorAddress = DocumentFieldMapper.GetField(nameof(VendorAddress), fields);
                 invoiceResponse.InvoiceDate = DocumentFieldMapper.GetField(nameof(InvoiceDate), fields);
-                invoiceResponse.LineItems = DocumentFieldMapper.GetLineItems(document);
+                invoiceResponse.LineItems = DocumentFieldMapper.GetInvoiceLineItems(document);
                 invoiceResponseCollection.Add(invoiceResponse);                
             }
             return invoiceResponseCollection;
