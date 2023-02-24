@@ -39,7 +39,7 @@ namespace FormRecognizerDemo
                 AddressValue addressValue = docField.Value.AsAddress();
                 return new DocumentAttributeResponse
                     ($"{addressValue.HouseNumber}, {addressValue.Road}, {addressValue.City}, " +
-                    $"{addressValue.State}, {addressValue.PoBox}, {addressValue.PostalCode}, {addressValue.CountryRegion}",
+                    $"{addressValue.State}, {addressValue.PostalCode}, {addressValue.CountryRegion}",
                     docField.Confidence);
             }
             return default;

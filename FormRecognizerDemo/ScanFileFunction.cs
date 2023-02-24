@@ -29,7 +29,7 @@ namespace FormRecognizerDemo
             [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
-            var documentType = PrebuiltModelType.BusinessCard;
+            var documentType = PrebuiltModelType.Invoice;
             var parsedFormBody = MultipartFormDataParser.ParseAsync(req.Body);
             var file = parsedFormBody.Result.Files[0].Data;
 
