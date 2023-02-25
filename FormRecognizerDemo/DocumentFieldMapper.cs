@@ -34,92 +34,106 @@ namespace FormRecognizerDemo
                     ($"{dateValue.ToString("d")}", docField.Confidence);
             }
 
-            if (docField.FieldType == DocumentFieldType.Address)
-            {
-                AddressValue addressValue = docField.Value.AsAddress();
-                return new DocumentAttributeResponse
-                    ($"{addressValue.HouseNumber}, {addressValue.Road}, {addressValue.City}, " +
-                    $"{addressValue.State}, {addressValue.PostalCode}, {addressValue.CountryRegion}",
-                    docField.Confidence);
-            }
+
             return default;
         }
-        public static DocumentAttributeResponse GetField(string fieldName, IReadOnlyDictionary<string, DocumentField> itemFields)
-        {
 
+        public static AddressResponse GetAddress(string fieldName, IReadOnlyDictionary<string, DocumentField> itemFields)
+        {
             if (itemFields.TryGetValue(fieldName, out DocumentField? docField))
-            {
-                return GetValueByType(docField);
-            }
+                if (docField.FieldType == DocumentFieldType.Address)
+                {
+                    AddressValue addressValue = docField.Value.AsAddress();
+                    return new AddressResponse
+                    {
+                        HouseNumber = addressValue.HouseNumber,
+                        Road = addressValue.Road,
+                        City = addressValue.City,
+                        State = addressValue.State,
+                        PostalCode = addressValue.PostalCode,
+                        CountryRegion = addressValue.CountryRegion,
+                        ConfidenceLevel = docField.Confidence
+                    };
+                }        
+
             return default;
         }
+    public static DocumentAttributeResponse GetField(string fieldName, IReadOnlyDictionary<string, DocumentField> itemFields)
+    {
 
-        public static IEnumerable<InvoiceLineItemResponse> GetInvoiceLineItems(AnalyzedDocument document)
+        if (itemFields.TryGetValue(fieldName, out DocumentField? docField))
         {
-            var lineItems = new List<InvoiceLineItemResponse>();
-
-            if (document.Fields.TryGetValue("Items", out DocumentField? itemsField))
-            {
-                if (itemsField.FieldType == DocumentFieldType.List)
-                {                    
-                    foreach (DocumentField itemField in itemsField.Value.AsList())
-                    {
-                        var currentLine = new InvoiceLineItemResponse();
-                        if (itemField.FieldType == DocumentFieldType.Dictionary)
-                        {
-                            IReadOnlyDictionary<string, DocumentField> itemFields = itemField.Value.AsDictionary();
-                            currentLine.Description = GetField((nameof(currentLine.Description)), itemFields);
-                            currentLine.Quantity = GetField((nameof(currentLine.Quantity)), itemFields);
-                            currentLine.Amount = GetField((nameof(currentLine.Amount)), itemFields);
-                        }
-                        lineItems.Add(currentLine);
-                    }                   
-                }
-            }
-            return lineItems;
+            return GetValueByType(docField);
         }
-
-        public static IEnumerable<ReceiptLineItemResponse> GetReceiptLineItems(AnalyzedDocument document)
-        {
-            var lineItems = new List<ReceiptLineItemResponse>();
-
-            if (document.Fields.TryGetValue("Items", out DocumentField? itemsField))
-            {
-                if (itemsField.FieldType == DocumentFieldType.List)
-                {
-                    foreach (DocumentField itemField in itemsField.Value.AsList())
-                    {
-                        var currentLine = new ReceiptLineItemResponse();
-                        if (itemField.FieldType == DocumentFieldType.Dictionary)
-                        {
-                            IReadOnlyDictionary<string, DocumentField> itemFields = itemField.Value.AsDictionary();
-                            currentLine.Description = GetField((nameof(currentLine.Description)), itemFields);
-                            currentLine.Quantity = GetField((nameof(currentLine.Quantity)), itemFields);
-                            currentLine.TotalPrice = GetField((nameof(currentLine.TotalPrice)), itemFields);
-                        }
-                        lineItems.Add(currentLine);
-                    }
-                }
-            }
-            return lineItems;
-        }
-
-        public static IEnumerable<DocumentAttributeResponse> GetMultipleFields(string fieldName, IReadOnlyDictionary<string, DocumentField> itemFields)
-        {
-            if (itemFields.TryGetValue(fieldName, out DocumentField jobTitlesFields))
-            {
-                if (jobTitlesFields.FieldType == DocumentFieldType.List)
-                {
-                    var collection = new List<DocumentAttributeResponse>();
-
-                    foreach (DocumentField jobTitleField in jobTitlesFields.Value.AsList())
-                    {
-                        collection.Add(GetValueByType(jobTitleField));
-                    }
-                    return collection;
-                }
-            }
-            return default;
-        }        
+        return default;
     }
+
+    public static IEnumerable<InvoiceLineItemResponse> GetInvoiceLineItems(AnalyzedDocument document)
+    {
+        var lineItems = new List<InvoiceLineItemResponse>();
+
+        if (document.Fields.TryGetValue("Items", out DocumentField? itemsField))
+        {
+            if (itemsField.FieldType == DocumentFieldType.List)
+            {
+                foreach (DocumentField itemField in itemsField.Value.AsList())
+                {
+                    var currentLine = new InvoiceLineItemResponse();
+                    if (itemField.FieldType == DocumentFieldType.Dictionary)
+                    {
+                        IReadOnlyDictionary<string, DocumentField> itemFields = itemField.Value.AsDictionary();
+                        currentLine.Description = GetField((nameof(currentLine.Description)), itemFields);
+                        currentLine.Quantity = GetField((nameof(currentLine.Quantity)), itemFields);
+                        currentLine.Amount = GetField((nameof(currentLine.Amount)), itemFields);
+                    }
+                    lineItems.Add(currentLine);
+                }
+            }
+        }
+        return lineItems;
+    }
+
+    public static IEnumerable<ReceiptLineItemResponse> GetReceiptLineItems(AnalyzedDocument document)
+    {
+        var lineItems = new List<ReceiptLineItemResponse>();
+
+        if (document.Fields.TryGetValue("Items", out DocumentField? itemsField))
+        {
+            if (itemsField.FieldType == DocumentFieldType.List)
+            {
+                foreach (DocumentField itemField in itemsField.Value.AsList())
+                {
+                    var currentLine = new ReceiptLineItemResponse();
+                    if (itemField.FieldType == DocumentFieldType.Dictionary)
+                    {
+                        IReadOnlyDictionary<string, DocumentField> itemFields = itemField.Value.AsDictionary();
+                        currentLine.Description = GetField((nameof(currentLine.Description)), itemFields);
+                        currentLine.Quantity = GetField((nameof(currentLine.Quantity)), itemFields);
+                        currentLine.TotalPrice = GetField((nameof(currentLine.TotalPrice)), itemFields);
+                    }
+                    lineItems.Add(currentLine);
+                }
+            }
+        }
+        return lineItems;
+    }
+
+    public static IEnumerable<DocumentAttributeResponse> GetMultipleFields(string fieldName, IReadOnlyDictionary<string, DocumentField> itemFields)
+    {
+        if (itemFields.TryGetValue(fieldName, out DocumentField jobTitlesFields))
+        {
+            if (jobTitlesFields.FieldType == DocumentFieldType.List)
+            {
+                var collection = new List<DocumentAttributeResponse>();
+
+                foreach (DocumentField jobTitleField in jobTitlesFields.Value.AsList())
+                {
+                    collection.Add(GetValueByType(jobTitleField));
+                }
+                return collection;
+            }
+        }
+        return default;
+    }
+}
 }

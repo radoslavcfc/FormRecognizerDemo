@@ -5,7 +5,7 @@ namespace FormRecognizerDemo.Models
     public class ReceiptResponse
     {
         public DocumentAttributeResponse MerchantName { get; set; }
-        public DocumentAttributeResponse MerchantAddress { get; set; }
+        public AddressResponse MerchantAddress { get; set; }
         public DocumentAttributeResponse MerchantPhoneNumber { get; set; }
         public DocumentAttributeResponse Subtotal { get; set; }
         public DocumentAttributeResponse Total { get; set; }
@@ -24,7 +24,7 @@ namespace FormRecognizerDemo.Models
                 var fields = document.Fields;
                 var receiptResponse = new ReceiptResponse();
                 receiptResponse.MerchantName = DocumentFieldMapper.GetField(nameof(MerchantName), fields);
-                receiptResponse.MerchantAddress = DocumentFieldMapper.GetField(nameof(MerchantAddress), fields);
+                receiptResponse.MerchantAddress = DocumentFieldMapper.GetAddress(nameof(MerchantAddress), fields);
                 receiptResponse.MerchantPhoneNumber = DocumentFieldMapper.GetField(nameof(MerchantPhoneNumber), fields);
                 receiptResponse.Subtotal = DocumentFieldMapper.GetField(nameof(Subtotal), fields);
                 receiptResponse.Total = DocumentFieldMapper.GetField(nameof(Total), fields);

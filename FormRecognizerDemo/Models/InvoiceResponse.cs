@@ -10,7 +10,7 @@ namespace FormRecognizerDemo.Models
         public DocumentAttributeResponse TotalTax { get; set; }
         public DocumentAttributeResponse InvoiceTotal { get; set; }
         public DocumentAttributeResponse BillingAddress { get; private set; }
-        public DocumentAttributeResponse VendorAddress { get; private set; }
+        public AddressResponse VendorAddress { get; private set; }
         public DocumentAttributeResponse InvoiceDate { get; private set; }
         public IEnumerable<InvoiceLineItemResponse> LineItems { get; set; }
 
@@ -31,7 +31,7 @@ namespace FormRecognizerDemo.Models
                 invoiceResponse.TotalTax = DocumentFieldMapper.GetField(nameof(TotalTax), fields);
                 invoiceResponse.InvoiceTotal = DocumentFieldMapper.GetField(nameof(InvoiceTotal), fields);
                 invoiceResponse.BillingAddress = DocumentFieldMapper.GetField(nameof(BillingAddress), fields);
-                invoiceResponse.VendorAddress = DocumentFieldMapper.GetField(nameof(VendorAddress), fields);
+                invoiceResponse.VendorAddress = DocumentFieldMapper.GetAddress(nameof(VendorAddress), fields);
                 invoiceResponse.InvoiceDate = DocumentFieldMapper.GetField(nameof(InvoiceDate), fields);
                 invoiceResponse.LineItems = DocumentFieldMapper.GetInvoiceLineItems(document);
                 invoiceResponseCollection.Add(invoiceResponse);                
