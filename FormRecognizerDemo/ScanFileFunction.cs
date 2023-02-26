@@ -29,7 +29,10 @@ namespace FormRecognizerDemo
             [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)
         {
             _logger.LogInformation("C# HTTP trigger function processed a request.");
-            AzureKeyCredential credential = new AzureKeyCredential(_recognizerOptions.ApiKey);
+
+            //Register Analysis client
+            AzureKeyCredential credential = new AzureKeyCredential(
+                _recognizerOptions.ApiKey);
             DocumentAnalysisClient client =
                 new DocumentAnalysisClient(new Uri(_recognizerOptions.Endpoint), credential);
 
