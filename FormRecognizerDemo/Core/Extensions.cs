@@ -1,4 +1,4 @@
-﻿namespace FormRecognizerDemo
+﻿namespace FormRecognizerDemo.Core
 {
     public static class Helper
     {

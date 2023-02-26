@@ -1,4 +1,4 @@
-﻿namespace FormRecognizerDemo
+﻿namespace FormRecognizerDemo.Enums
 {
     public enum PrebuiltModelType
     {

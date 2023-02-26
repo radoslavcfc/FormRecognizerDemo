@@ -1,4 +1,5 @@
 ﻿using Azure.AI.FormRecognizer.DocumentAnalysis;
+using FormRecognizerDemo.Core;
 
 namespace FormRecognizerDemo.Models
 {
@@ -9,7 +10,8 @@ namespace FormRecognizerDemo.Models
         public IEnumerable<DocumentAttributeResponse> Emails { get; set; }
         public IEnumerable<DocumentAttributeResponse> Websites { get; set; }
         public IEnumerable<DocumentAttributeResponse> WorkPhones { get; set; }
-
+        public IEnumerable<AddressResponse> Addresses { get; set; }
+        public IEnumerable<AddressResponse> MobilePhones { get; set; }
         public static IEnumerable<BusinessCardResponse> MapToDto(AnalyzeResult result)
         {
             var invoiceResponseCollection = new List<BusinessCardResponse>();
@@ -18,14 +20,16 @@ namespace FormRecognizerDemo.Models
             {
                 AnalyzedDocument document = result.Documents[i];
                 var fields = document.Fields;
-                var invoiceResponse = new BusinessCardResponse();
-                invoiceResponse.CompanyNames = DocumentFieldMapper.GetMultipleFields(nameof(CompanyNames), fields);
-                invoiceResponse.ContactNames = DocumentFieldMapper.GetMultipleFields(nameof(ContactNames), fields);
-                invoiceResponse.Emails = DocumentFieldMapper.GetMultipleFields(nameof(Emails), fields);
-                invoiceResponse.Websites = DocumentFieldMapper.GetMultipleFields(nameof(Websites), fields);
-                invoiceResponse.WorkPhones = DocumentFieldMapper.GetMultipleFields(nameof(WorkPhones), fields);
-                
-                invoiceResponseCollection.Add(invoiceResponse);
+                var businessCardResponse = new BusinessCardResponse();
+                businessCardResponse.CompanyNames = DocumentFieldMapper.GetMultipleFields(nameof(CompanyNames), fields);
+                businessCardResponse.ContactNames = DocumentFieldMapper.GetMultipleFields(nameof(ContactNames), fields);
+                businessCardResponse.Emails = DocumentFieldMapper.GetMultipleFields(nameof(Emails), fields);
+                businessCardResponse.Websites = DocumentFieldMapper.GetMultipleFields(nameof(Websites), fields);
+                businessCardResponse.WorkPhones = DocumentFieldMapper.GetMultipleFields(nameof(WorkPhones), fields);
+                businessCardResponse.Addresses = DocumentFieldMapper.GetMultipleAddresses(nameof(Addresses), fields);
+                businessCardResponse.MobilePhones = DocumentFieldMapper.GetMultipleAddresses(nameof(MobilePhones), fields);
+
+                invoiceResponseCollection.Add(businessCardResponse);
             }
             return invoiceResponseCollection;
         }

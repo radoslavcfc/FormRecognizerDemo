@@ -1,8 +1,9 @@
 ﻿using Azure.AI.FormRecognizer.DocumentAnalysis;
+using FormRecognizerDemo.Core;
 
 namespace FormRecognizerDemo.Models
 {
-    public class InvoiceResponse
+    public class InvoiceResponse 
     {
         public DocumentAttributeResponse VendorName { get; set; }
         public DocumentAttributeResponse CustomerName { get; set; }
@@ -31,7 +32,7 @@ namespace FormRecognizerDemo.Models
                 invoiceResponse.TotalTax = DocumentFieldMapper.GetField(nameof(TotalTax), fields);
                 invoiceResponse.InvoiceTotal = DocumentFieldMapper.GetField(nameof(InvoiceTotal), fields);
                 invoiceResponse.BillingAddress = DocumentFieldMapper.GetField(nameof(BillingAddress), fields);
-                invoiceResponse.VendorAddress = DocumentFieldMapper.GetAddress(nameof(VendorAddress), fields);
+                invoiceResponse.VendorAddress = DocumentFieldMapper.GetAddressField(nameof(VendorAddress), fields);
                 invoiceResponse.InvoiceDate = DocumentFieldMapper.GetField(nameof(InvoiceDate), fields);
                 invoiceResponse.LineItems = DocumentFieldMapper.GetInvoiceLineItems(document);
                 invoiceResponseCollection.Add(invoiceResponse);                
