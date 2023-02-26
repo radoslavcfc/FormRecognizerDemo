@@ -9,6 +9,7 @@ using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net;
+using System.Runtime.CompilerServices;
 
 namespace FormRecognizerDemo
 {
@@ -59,33 +60,17 @@ namespace FormRecognizerDemo
             }
 
             //Analyze the results:
+            var response = req.CreateResponse(HttpStatusCode.OK);
             AnalyzeResult result = operation.Value;
 
-            var response = req.CreateResponse(HttpStatusCode.OK);
-            switch (documentType)
-            {
-                case PrebuiltModelType.Invoice:
-                    { 
-                        var mappedResult = InvoiceResponse.MapToDto(result);                        
-                        await response.WriteAsJsonAsync(mappedResult);                        
-                    }
-                    break;
-                case PrebuiltModelType.Receipt:
-                    {
-                        var mappedResult = ReceiptResponse.MapToDto(result);
-                        await response.WriteAsJsonAsync(mappedResult);
-                    }
-                    break;
-                case PrebuiltModelType.BusinessCard:
-                    {
-                        var mappedResult = BusinessCardResponse.MapToDto(result);
-                        await response.WriteAsJsonAsync(mappedResult);
-                    }
-                    break;
-                default:
-                    break;
-            }
+            var mappedResult = documentType == PrebuiltModelType.Invoice ?
+                InvoiceResponse.MapToDto(result) :
+                (documentType == PrebuiltModelType.Receipt ?
+                    ReceiptResponse.MapToDto(result) :
+                    documentType == PrebuiltModelType.BusinessCard ?
+                    BusinessCardResponse.MapToDto(result) : new Object());
 
+            await response.WriteAsJsonAsync(mappedResult);
             return response;
         }
     }
